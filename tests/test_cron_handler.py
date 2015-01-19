@@ -10,7 +10,7 @@
     :license: BSD, see LICENSE for more details.
 """
 from unittest import TestCase
-from src.handlers.cron import Scheduler
+from robo.handlers.cron import Scheduler
 
 
 class TestScheduler(TestCase):
