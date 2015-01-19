@@ -27,7 +27,7 @@ setup(
     author='Shinya Ohyanagi',
     author_email='sohyanagi@gmail.com',
     url='http://github.com/heavenshell/py-robo-cron',
-    description='Dead simple bot framework.',
+    description='Mount cron system to robo.',
     long_description=description,
     license='BSD',
     platforms='any',
