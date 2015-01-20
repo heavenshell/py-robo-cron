@@ -18,9 +18,10 @@ class Scheduler(object):
         self.scheduler = BackgroundScheduler()
         self.scheduler.start()
         self.signal = None
+        self.robot_name = None
 
     def message(self, **kwargs):
-        self.signal.send(kwargs['message'])
+        self.signal.send('{0} {1}'.format(self.robot_name, kwargs['message']))
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -98,6 +99,15 @@ class Cron(object):
     def __init__(self):
         self.scheduler = Scheduler()
         self._signal = None
+        self._name = None
+
+    @property
+    def robot_name(self):
+        return None
+
+    @robot_name.setter
+    def name(self, robot_name):
+        self.scheduler.robot_name = robot_name
 
     @property
     def signal(self):
