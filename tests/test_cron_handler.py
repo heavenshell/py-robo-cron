@@ -30,7 +30,22 @@ class TestScheduler(TestCase):
         }
         self.assertEqual(ret, expected)
 
+    def test_should_add_job(self):
+        """ Scheduler().add_job() should add job. """
+        ret = self.scheduler.add_job('15 1 5 12 6', 'test job')
+        self.assertIsNotNone(ret)
+
+    def test_should_not_add_job(self):
+        """ Scheduler().add_job() should return None when expprssion is invalid. """
+        ret = self.scheduler.add_job('15 1 5 12', 'test job')
+        self.assertIsNone(ret)
+
+    def test_should_list_jobs(self):
+        self.scheduler.add_job('15 1 1 12 *', 'test job')
+        jobs = self.scheduler.list_job()
+        self.assertEqual(jobs[0]['message'], 'test job')
+        self.assertEqual(jobs[0]['trigger'], '15 1 1 12 *')
+
 
 class TestCronHandler(TestCase):
     pass
-

@@ -20,7 +20,7 @@ class Scheduler(object):
         self.signal = None
 
     def message(self, **kwargs):
-        self.signal.send('cron message {0}'.format(kwargs['message']))
+        self.signal.send(kwargs['message'])
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -36,6 +36,9 @@ class Scheduler(object):
         :param cron:
         """
         expressions = cron.split(' ')
+        if len(expressions) != 5:
+            return None
+
         ret = {
             'minute': expressions[0],
             'hour': expressions[1],
@@ -45,16 +48,44 @@ class Scheduler(object):
         }
         return ret
 
-    def add_job(self, job, message):
+    def add_job(self, cron, message):
+        """Add job to scheduler.
+
+        :param cron: Cron style expression
+        :param message: Message to show
+        """
         kwargs = {'message': message}
-        cron = self.parse_cron_expression(job)
+        cron = self.parse_cron_expression(cron)
+        if cron is None:
+            return None
         job = self.scheduler.add_job(self.message, 'cron',
                                      kwargs=kwargs, **cron)
 
         return job
 
-    def list_job(self, id):
-        pass
+    def list_job(self):
+        """List job.
+
+        Job contains id, cron expression, message, next trigger.
+        """
+        jobs = self.scheduler.get_jobs()
+        results = []
+        for job in jobs:
+            cron = '{0} {1} {2} {3} {4}'.format(
+                job.trigger.fields[6], #: minute
+                job.trigger.fields[5], #: hour
+                job.trigger.fields[2], #: day
+                job.trigger.fields[1], #: month
+                job.trigger.fields[4], #: day of week
+            )
+            results.append({
+                'id': job.id,
+                'message': job.kwargs['message'],
+                'trigger': cron,
+                'next': job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
+            })
+
+        return results
 
     def remove_job(self, id):
         pass
@@ -76,7 +107,8 @@ class Cron(object):
     def signal(self, signal):
         self.scheduler.signal = signal
 
-    @cmd(regex=r'add job "(?P<schedule>.+)" (?P<body>.+)')
+    @cmd(regex=r'add job "(?P<schedule>.+)" (?P<body>.+)',
+         description='add job')
     def add(self, message, **kwargs):
         group = message.match
         job = self.scheduler.add_job(group(1), group(2))
