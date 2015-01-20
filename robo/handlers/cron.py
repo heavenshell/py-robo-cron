@@ -17,11 +17,16 @@ from robo.decorators import cmd
 
 class Scheduler(object):
     def __init__(self):
+        """Construct a scheduler."""
         self.scheduler = BackgroundScheduler()
         self.scheduler.start()
         self.signal = None
 
     def message(self, **kwargs):
+        """Send registered message to robot.
+
+        :param **kwargs:
+        """
         self.signal.send(kwargs['message'])
 
     def parse_cron_expression(self, cron):
@@ -68,18 +73,18 @@ class Scheduler(object):
     def list_job(self):
         """List job.
 
-        Job contains id, cron expression, message, next trigger.
+        Returns job contains id, cron expression, message, next trigger.
         """
         jobs = self.scheduler.get_jobs()
         results = []
         fmt = '{0}: "{1}" {2} {3}'
         for job in jobs:
             cron = '{0} {1} {2} {3} {4}'.format(
-                job.trigger.fields[6], #: minute
-                job.trigger.fields[5], #: hour
-                job.trigger.fields[2], #: day
-                job.trigger.fields[1], #: month
-                job.trigger.fields[4], #: day of week
+                job.trigger.fields[6],  # minute
+                job.trigger.fields[5],  # hour
+                job.trigger.fields[2],  # day
+                job.trigger.fields[1],  # month
+                job.trigger.fields[4],  # day of week
             )
 
             time = job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
@@ -89,6 +94,10 @@ class Scheduler(object):
         return results
 
     def remove_job(self, id):
+        """Remove job.
+
+        :param id: Job id
+        """
         try:
             self.scheduler.remove_job(id)
         except JobLookupError:
@@ -97,13 +106,27 @@ class Scheduler(object):
         return True
 
     def pause_job(self, id):
+        """Pause job.
+
+        :param id: Job id
+        """
         self.scheduler.pause_job(id)
 
     def resume_job(self, id):
+        """Resume job.
+
+        :param id: Job id
+        """
         self.scheduler.resume_job(id)
+
 
 class Cron(object):
     def __init__(self):
+        """Construct a cron handler.
+
+        > robo add job "0 * * * *" robo echo message
+        Every 0 minute fired `robo echo message` command.
+        """
         logger = logging.getLogger('apscheduler')
         logger.setLevel(logging.ERROR)
 
