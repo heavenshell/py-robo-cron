@@ -9,7 +9,9 @@
     :copyright: (c) 2015 Shinya Ohyanagi, All rights reserved.
     :license: BSD, see LICENSE for more details.
 """
+import logging
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.jobstores.base import JobLookupError
 from robo.decorators import cmd
 
 
@@ -18,10 +20,9 @@ class Scheduler(object):
         self.scheduler = BackgroundScheduler()
         self.scheduler.start()
         self.signal = None
-        self.robot_name = None
 
     def message(self, **kwargs):
-        self.signal.send('{0} {1}'.format(self.robot_name, kwargs['message']))
+        self.signal.send(kwargs['message'])
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -71,6 +72,7 @@ class Scheduler(object):
         """
         jobs = self.scheduler.get_jobs()
         results = []
+        fmt = '{0}: "{1}" {2} {3}'
         for job in jobs:
             cron = '{0} {1} {2} {3} {4}'.format(
                 job.trigger.fields[6], #: minute
@@ -79,35 +81,34 @@ class Scheduler(object):
                 job.trigger.fields[1], #: month
                 job.trigger.fields[4], #: day of week
             )
-            results.append({
-                'id': job.id,
-                'message': job.kwargs['message'],
-                'trigger': cron,
-                'next': job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
-            })
+
+            time = job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
+            message = job.kwargs['message']
+            results.append(fmt.format(job.id, cron, time, message))
 
         return results
 
     def remove_job(self, id):
-        pass
+        try:
+            self.scheduler.remove_job(id)
+        except JobLookupError:
+            return False
+
+        return True
 
     def pause_job(self, id):
-        pass
+        self.scheduler.pause_job(id)
 
+    def resume_job(self, id):
+        self.scheduler.resume_job(id)
 
 class Cron(object):
     def __init__(self):
+        logger = logging.getLogger('apscheduler')
+        logger.setLevel(logging.ERROR)
+
         self.scheduler = Scheduler()
         self._signal = None
-        self._name = None
-
-    @property
-    def robot_name(self):
-        return None
-
-    @robot_name.setter
-    def name(self, robot_name):
-        self.scheduler.robot_name = robot_name
 
     @property
     def signal(self):
@@ -118,9 +119,35 @@ class Cron(object):
         self.scheduler.signal = signal
 
     @cmd(regex=r'add job "(?P<schedule>.+)" (?P<body>.+)',
-         description='add job')
+         description='Add a cron job.')
     def add(self, message, **kwargs):
-        group = message.match
-        job = self.scheduler.add_job(group(1), group(2))
+        job = self.scheduler.add_job(message.match.group(1),
+                                     message.match.group(2))
 
         return 'Job {0} created.'.format(job)
+
+    @cmd(regex=r'list jobs$', description='List all cron jobs.')
+    def list(self, message, **kwargs):
+        jobs = self.scheduler.list_job()
+
+        return '\n'.join(jobs)
+
+    @cmd(regex=r'delete job (?P<id>.+)', description='Delte a cron job.')
+    def delete(self, message, **kwargs):
+        ret = self.scheduler.remove_job(message.match.group(1))
+        if ret is False:
+            return 'Fail to delete job. Job not found.'
+
+        return 'Success to delete job.'
+
+    @cmd(regex=r'pause job (?P<id>.+)', description='Pause a cron job.')
+    def pause(self, message, **kwargs):
+        self.scheduler.pause_job(message.match.group(1))
+
+        return 'Job paused.'
+
+    @cmd(regex=r'resume job (?P<id>.+)', description='Resume a cron job.')
+    def resume(self, message, **kwargs):
+        self.scheduler.resume_job(message.match.group(1))
+
+        return 'Job resumed.'
