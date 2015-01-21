@@ -67,7 +67,6 @@ class Scheduler(object):
             return None
         job = self.scheduler.add_job(self.message, 'cron',
                                      kwargs=kwargs, **cron)
-
         return job
 
     def list_job(self):
@@ -86,8 +85,10 @@ class Scheduler(object):
                 job.trigger.fields[1],  # month
                 job.trigger.fields[4],  # day of week
             )
-
-            time = job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
+            if job.next_run_time is None:
+                time = 'paused'
+            else:
+                time = job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
             message = job.kwargs['message']
             results.append(fmt.format(job.id, cron, time, message))
 
