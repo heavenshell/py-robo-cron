@@ -45,7 +45,7 @@ class TestScheduler(TestCase):
 
     def test_should_list_jobs(self):
         self.scheduler.add_job('15 1 1 12 *', 'test job')
-        jobs = self.scheduler.list_job()
+        jobs = self.scheduler.list_jobs()
         self.assertTrue('"15 1 1 12 *"' in jobs[0])
         self.assertTrue('test job' in jobs[0])
 
@@ -64,18 +64,18 @@ class TestScheduler(TestCase):
         """ Scheduler().pause_job() should pause registered job. """
         job = self.scheduler.add_job('15 1 1 12 *', 'test job')
         self.scheduler.pause_job(job.id)
-        jobs = self.scheduler.list_job()
+        jobs = self.scheduler.list_jobs()
         self.assertTrue('paused' in jobs[0])
 
     def test_should_resume_job(self):
         """ Scheduler().resume_job() should resume paused job. """
         job = self.scheduler.add_job('15 1 1 12 *', 'test job2')
         self.scheduler.pause_job(job.id)
-        jobs = self.scheduler.list_job()
+        jobs = self.scheduler.list_jobs()
         self.assertTrue('paused' in jobs[0])
 
         self.scheduler.resume_job(job.id)
-        jobs = self.scheduler.list_job()
+        jobs = self.scheduler.list_jobs()
         self.assertFalse('paused' in jobs[0])
 
 

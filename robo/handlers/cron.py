@@ -69,8 +69,8 @@ class Scheduler(object):
                                      kwargs=kwargs, **cron)
         return job
 
-    def list_job(self):
-        """List job.
+    def list_jobs(self):
+        """List jobs.
 
         Returns job contains id, cron expression, message, next trigger.
         """
@@ -152,7 +152,7 @@ class Cron(object):
 
     @cmd(regex=r'list jobs$', description='List all cron jobs.')
     def list(self, message, **kwargs):
-        jobs = self.scheduler.list_job()
+        jobs = self.scheduler.list_jobs()
 
         return '\n'.join(jobs)
 
