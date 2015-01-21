@@ -9,8 +9,20 @@
     :copyright: (c) 2015 Shinya Ohyanagi, All rights reserved.
     :license: BSD, see LICENSE for more details.
 """
+import logging
 from unittest import TestCase
-from robo.handlers.cron import Scheduler
+from robo.robot import Robot
+from robo.handlers.cron import Scheduler, Cron
+
+
+class NullAdapter(object):
+    def __init__(self, signal):
+        self.signal = signal
+        self.responses = []
+
+    def say(self, message, **kwargs):
+        self.responses.append(message)
+        return message
 
 
 class TestScheduler(TestCase):
@@ -80,4 +92,73 @@ class TestScheduler(TestCase):
 
 
 class TestCronHandler(TestCase):
-    pass
+    @classmethod
+    def setUpClass(cls):
+        logger = logging.getLogger('robo')
+        logger.level = logging.ERROR
+        cls.robot = Robot('test', logger)
+
+        cron = Cron()
+        cron.signal = cls.robot.handler_signal
+        method = cls.robot.parse_handler_methods(cron)
+        cls.robot.handlers.extend(method)
+
+        adapter = NullAdapter(cls.robot.handler_signal)
+        cls.robot.adapters['null'] = adapter
+
+    def _job_id(self):
+        self.robot.handler_signal.send('test list jobs')
+        job = self.robot.adapters['null'].responses[0]
+        id = job[:job.find(':')]
+        self.robot.adapters['null'].responses = []
+
+        return id
+
+    def test_should_add_job(self):
+        """ Cron().add() should register job to scheduler and return job message. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.assertRegexpMatches(self.robot.adapters['null'].responses[0],
+                                 r'^Job Scheduler\.message')
+        self.robot.adapters['null'].responses = []
+
+    def test_list_job(self):
+        """Cron().list_jobs should contains job id, trigger expressions. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.robot.adapters['null'].responses = []
+        self.robot.handler_signal.send('test list jobs')
+        job = self.robot.adapters['null'].responses[0]
+        self.assertRegexpMatches(job, r'[A-z0-9]: "* * * * *"')
+        self.robot.adapters['null'].responses = []
+
+    def test_should_delete_job(self):
+        """ Cron().delete() should delete job from scheduler. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.robot.adapters['null'].responses = []
+        id = self._job_id()
+        self.robot.handler_signal.send('test delete job {0}'.format(id))
+
+        self.assertEqual(self.robot.adapters['null'].responses[0],
+                         'Success to delete job.')
+        self.robot.adapters['null'].responses = []
+
+    def test_should_pause_job(self):
+        """ Cron().pause() should pause job. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.robot.adapters['null'].responses = []
+        id = self._job_id()
+        self.robot.handler_signal.send('test pause job {0}'.format(id))
+
+        self.assertEqual(self.robot.adapters['null'].responses[0],
+                         'Job paused.')
+
+    def test_should_resume_job(self):
+        """ Cron().resume() should pause job. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.robot.adapters['null'].responses = []
+        id = self._job_id()
+        self.robot.handler_signal.send('test pause job {0}'.format(id))
+        self.robot.adapters['null'].responses = []
+
+        self.robot.handler_signal.send('test resume job {0}'.format(id))
+        self.assertEqual(self.robot.adapters['null'].responses[0],
+                         'Job resumed.')
