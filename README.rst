@@ -1,5 +1,7 @@
 robo.handlers.cron
 ==================
+.. image:: https://travis-ci.org/heavenshell/py-robo-cron.svg?branch=master
+    :target: https://travis-ci.org/heavenshell/py-robo-cron
 
 Mount cron system to `robo <https://github.com/heavenshell/py-robo/>`_.
 
