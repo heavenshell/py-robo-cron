@@ -85,6 +85,7 @@ class Scheduler(object):
                 job.trigger.fields[1],  # month
                 job.trigger.fields[4],  # day of week
             )
+            #: When job is paused, job.next_run_time is null.
             if job.next_run_time is None:
                 time = 'paused'
             else:
@@ -128,6 +129,7 @@ class Cron(object):
         > robo add job "0 * * * *" robo echo message
         Every 0 minute fired `robo echo message` command.
         """
+        #: Disable apscheduler's log.
         logger = logging.getLogger('apscheduler')
         logger.setLevel(logging.ERROR)
 
