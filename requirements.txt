@@ -1,2 +1,2 @@
--e git://github.com/heavenshell/py-robo.git#egg=robo
+robo
 APScheduler
