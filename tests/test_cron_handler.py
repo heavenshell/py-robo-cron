@@ -131,6 +131,16 @@ class TestCronHandler(TestCase):
         self.robot.adapters['null'].responses = []
 
     def test_should_delete_job(self):
+        """ Cron().delete() should not delete job from scheduler when job id not exists. """
+        self.robot.handler_signal.send('test add job "* * * * *" foo')
+        self.robot.adapters['null'].responses = []
+        self.robot.handler_signal.send('test delete job aaa')
+
+        self.assertEqual(self.robot.adapters['null'].responses[0],
+                         'Fail to delete job. Job not found.')
+        self.robot.adapters['null'].responses = []
+
+    def test_should_not_delete_job(self):
         """ Cron().delete() should delete job from scheduler. """
         self.robot.handler_signal.send('test add job "* * * * *" foo')
         self.robot.adapters['null'].responses = []
