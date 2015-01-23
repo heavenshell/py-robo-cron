@@ -117,8 +117,8 @@ class TestCronHandler(TestCase):
     def test_should_add_job(self):
         """ Cron().add() should register job to scheduler and return job message. """
         self.robot.handler_signal.send('test add job "* * * * *" foo')
-        self.assertRegexpMatches(self.robot.adapters['null'].responses[0],
-                                 r'^Job Scheduler\.message')
+        self.assertRegex(self.robot.adapters['null'].responses[0],
+                         r'^Job Scheduler\.message')
         self.robot.adapters['null'].responses = []
 
     def test_list_job(self):
@@ -127,7 +127,7 @@ class TestCronHandler(TestCase):
         self.robot.adapters['null'].responses = []
         self.robot.handler_signal.send('test list jobs')
         job = self.robot.adapters['null'].responses[0]
-        self.assertRegexpMatches(job, r'[A-z0-9]: "* * * * *"')
+        self.assertRegex(job, r'[A-z0-9]: "* * * * *"')
         self.robot.adapters['null'].responses = []
 
     def test_should_delete_job(self):
