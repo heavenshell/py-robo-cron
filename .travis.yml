@@ -4,6 +4,8 @@ python:
   - 2.7
   - 3.4
 
-before_install: pip install -r requirements.txt
+before_install:
+  - pip install -r requirements.txt
+  - pip install git+https//github.com/heavenshell/py-robo-cron.git
 
 script: python setup.py test
