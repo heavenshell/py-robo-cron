@@ -52,18 +52,18 @@ class TestScheduler(TestCase):
 
     def test_should_not_add_job(self):
         """ Scheduler().add_job() should return None when expprssion is invalid. """
-        ret = self.scheduler.add_job('15 1 5 12', 'test job')
+        ret = self.scheduler.add_job('* * * *', 'test job')
         self.assertIsNone(ret)
 
     def test_should_list_jobs(self):
-        self.scheduler.add_job('15 1 1 12 *', 'test job')
+        self.scheduler.add_job('* * * * *', 'test job')
         jobs = self.scheduler.list_jobs()
-        self.assertTrue('"15 1 1 12 *"' in jobs[0])
+        self.assertTrue('"* * * * *"' in jobs[0])
         self.assertTrue('test job' in jobs[0])
 
     def test_should_delete_job(self):
         """ Scheduler().remove_job() shoudl return True when job remove sucess. """
-        job = self.scheduler.add_job('15 1 1 12 *', 'test job')
+        job = self.scheduler.add_job('*/10 * * * *', 'test job')
         ret = self.scheduler.remove_job(job.id)
         self.assertTrue(ret)
 
@@ -74,14 +74,14 @@ class TestScheduler(TestCase):
 
     def test_should_pouse_job(self):
         """ Scheduler().pause_job() should pause registered job. """
-        job = self.scheduler.add_job('15 1 1 12 *', 'test job')
+        job = self.scheduler.add_job('*/15 * * * *', 'test job')
         self.scheduler.pause_job(job.id)
         jobs = self.scheduler.list_jobs()
         self.assertTrue('paused' in jobs[0])
 
     def test_should_resume_job(self):
         """ Scheduler().resume_job() should resume paused job. """
-        job = self.scheduler.add_job('15 1 1 12 *', 'test job2')
+        job = self.scheduler.add_job('*/30 * * * *', 'test job2')
         self.scheduler.pause_job(job.id)
         jobs = self.scheduler.list_jobs()
         self.assertTrue('paused' in jobs[0])
