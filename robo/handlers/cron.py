@@ -166,9 +166,14 @@ class Cron(object):
         if isinstance(options, dict) and 'cron' in options:
             if 'jobstore' in options['cron']:
                 jobstore = options['cron']['jobstore']
+            else:
+                return
+
+            options = {}
+            if 'options' in options['cron']:
                 options = options['cron']['options']
 
-                self.scheduler.add_jobstore(jobstore, **options)
+            self.scheduler.add_jobstore(jobstore, **options)
 
     @cmd(regex=r'add job "(?P<schedule>.+)" (?P<body>.+)',
          description='Add a cron job.')
