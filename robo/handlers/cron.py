@@ -121,6 +121,18 @@ class Scheduler(object):
         """
         self.scheduler.resume_job(id)
 
+    def add_jobstore(self, jobstore):
+        """Add a job store to scheduler.
+
+        :param jobstore: Job store
+        """
+        try:
+            self.scheduler.add_jobstore(jobstore)
+        except ValueError:
+            return False
+
+        return True
+
 
 class Cron(object):
     def __init__(self):
@@ -135,6 +147,7 @@ class Cron(object):
 
         self.scheduler = Scheduler()
         self._signal = None
+        self._options = None
 
     @property
     def signal(self):
@@ -143,6 +156,19 @@ class Cron(object):
     @signal.setter
     def signal(self, signal):
         self.scheduler.signal = signal
+
+    @property
+    def options(self):
+        return None
+
+    @options.setter
+    def options(self, options):
+        if isinstance(options, dict) and 'cron' in options:
+            if 'jobstore' in options['cron']:
+                jobstore = options['cron']['jobstore']
+                options = options['cron']['options']
+
+                self.scheduler.add_jobstore(jobstore, **options)
 
     @cmd(regex=r'add job "(?P<schedule>.+)" (?P<body>.+)',
          description='Add a cron job.')
