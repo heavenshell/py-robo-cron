@@ -25,7 +25,7 @@ class Scheduler(object):
     def message(self, **kwargs):
         """Send registered message to robot.
 
-        :param **kwargs:
+        :param **kwargs: Data to be sent to receivers
         """
         self.signal.send(kwargs['message'])
 
@@ -40,7 +40,7 @@ class Scheduler(object):
         | `------- hour -------- 0 .. 23
         `--------- minute ------ 0 .. 59
 
-        :param cron:
+        :param cron: Cron expression
         """
         expressions = cron.split(' ')
         if len(expressions) != 5:
