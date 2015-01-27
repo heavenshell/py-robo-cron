@@ -227,3 +227,17 @@ class Cron(object):
         self.scheduler.resume_job(message.match.group(1))
 
         return 'Job resumed.'
+
+    @cmd(regex=r'job expression$', description='Show job expression.')
+    def usage(self, message, **kwargs):
+        usage = """
+        * * * * *
+        T T T T T
+        | | | | `- day_of_week - 0 ..  6
+        | | | `--- month ------- 1 .. 12
+        | | `----- day --------- 1 .. 31
+        | `------- hour -------- 0 .. 23
+        `--------- minute ------ 0 .. 59
+        """
+
+        return usage
