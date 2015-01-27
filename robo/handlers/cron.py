@@ -14,20 +14,25 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.jobstores.base import JobLookupError
 from robo.decorators import cmd
 
+logger = logging.getLogger('robo')
+
 
 class Scheduler(object):
+    #: Robo's signal.
+    signal = None
     def __init__(self):
         """Construct a scheduler."""
         self.scheduler = BackgroundScheduler()
-        self.scheduler.start()
-        self.signal = None
+        if not self.scheduler.running:
+            self.scheduler.start()
 
-    def message(self, **kwargs):
+    @classmethod
+    def message(cls, **kwargs):
         """Send registered message to robot.
 
         :param **kwargs: Data to be sent to receivers
         """
-        self.signal.send(kwargs['message'])
+        cls.signal.send(kwargs['message'])
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -65,8 +70,15 @@ class Scheduler(object):
         cron = self.parse_cron_expression(cron)
         if cron is None:
             return None
-        job = self.scheduler.add_job(self.message, 'cron',
-                                     kwargs=kwargs, **cron)
+        job = None
+        try:
+            job = self.scheduler.add_job(self.message, 'cron',
+                                         kwargs=kwargs, **cron)
+        except Exception as e:
+            logger.error(e)
+            logger.info('Cron expression is {0}.'.format(cron))
+            logger.info('Action is {0}.'.format(message))
+
         return job
 
     def list_jobs(self):
@@ -102,7 +114,9 @@ class Scheduler(object):
         """
         try:
             self.scheduler.remove_job(id)
-        except JobLookupError:
+        except JobLookupError as e:
+            logger.error(e)
+
             return False
 
         return True
@@ -121,14 +135,15 @@ class Scheduler(object):
         """
         self.scheduler.resume_job(id)
 
-    def add_jobstore(self, jobstore):
+    def add_jobstore(self, jobstore, **kwargs):
         """Add a job store to scheduler.
 
         :param jobstore: Job store
         """
         try:
-            self.scheduler.add_jobstore(jobstore)
-        except ValueError:
+            self.scheduler.add_jobstore(jobstore, **kwargs)
+        except ValueError as e:
+            logger.error(e)
             return False
 
         return True
@@ -142,8 +157,8 @@ class Cron(object):
         Every 0 minute fired `robo echo message` command.
         """
         #: Disable apscheduler's log.
-        logger = logging.getLogger('apscheduler')
-        logger.setLevel(logging.ERROR)
+        apslogger = logging.getLogger('apscheduler')
+        apslogger.setLevel(logging.ERROR)
 
         self.scheduler = Scheduler()
         self._signal = None
@@ -155,7 +170,11 @@ class Cron(object):
 
     @signal.setter
     def signal(self, signal):
-        self.scheduler.signal = signal
+        #: Signal should be classmethod because if signal is instance,
+        #: `apscheduler` would raise ValueError.
+        #: ValueError: This Job cannot be serialized since the reference to
+        #: its callable
+        Scheduler.signal = signal
 
     @property
     def options(self):
