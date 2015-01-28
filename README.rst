@@ -48,3 +48,15 @@ Delete job.
 .. code::
   > robo delete job 61530a5a8e7e40c7814ce90768792476
   Success to delete job.
+
+Show cron expression.
+
+..code::
+  > robo job expression
+        * * * * *
+        T T T T T
+        | | | | `- day_of_week - 0 ..  6
+        | | | `--- month ------- 1 .. 12
+        | | `----- day --------- 1 .. 31
+        | `------- hour -------- 0 .. 23
+        `--------- minute ------ 0 .. 59
