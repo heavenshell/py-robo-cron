@@ -51,7 +51,7 @@ Delete job.
 
 Show cron expression.
 
-..code::
+.. code::
   > robo job expression
         * * * * *
         T T T T T
