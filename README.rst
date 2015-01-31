@@ -46,12 +46,14 @@ Resume paused job.
 Delete job.
 
 .. code::
+
   > robo delete job 61530a5a8e7e40c7814ce90768792476
   Success to delete job.
 
 Show cron expression.
 
 .. code::
+
   > robo job expression
         * * * * *
         T T T T T
@@ -60,3 +62,20 @@ Show cron expression.
         | | `----- day --------- 1 .. 31
         | `------- hour -------- 0 .. 23
         `--------- minute ------ 0 .. 59
+
+Job persistence
+~~~~~~~~~~~~~~~
+
+Add `jobstore` options to Robot options.
+
+.. code:: python
+
+  def main(args=None):
+      logging.basicConfig(level=args.verbose, format=Robot.debug_log_format)
+      logger = logging.getLogger('robo')
+
+      options = {'cron': {'jobstore': 'redis'}}
+      robot = Robot(name=args.name, logger=logger, **options)
+      robot.register_default_handlers()
+      robot.load_adapter(args.adapter)
+      robot.run(args.adapter)
