@@ -7,10 +7,18 @@ Mount cron system to `robo <https://github.com/heavenshell/py-robo/>`_.
 
 Send messages on a specific time.
 
+Install
+-------
+
+.. code::
+  $ pip install git+https://github.com/heavenshell/py-robo-cron
+
 Dependency
 ----------
 
 This handler depends on `APScheduler <https://bitbucket.org/agronholm/apscheduler/>`_.
+
+If you want to persistent job, you can use `Redis <https://pypi.python.org/pypi/redis/>_`.
 
 Usage
 -----
