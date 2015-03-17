@@ -32,7 +32,7 @@ class Scheduler(object):
 
         :param **kwargs: Data to be sent to receivers
         """
-        cls.signal.send(kwargs['message'])
+        cls.signal.send(message=kwargs['body'], **kwargs)
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -60,13 +60,13 @@ class Scheduler(object):
         }
         return ret
 
-    def add_job(self, cron, message):
+    def add_job(self, cron, message, **kwargs):
         """Add job to scheduler.
 
         :param cron: Cron style expression
         :param message: Message to show
         """
-        kwargs = {'message': message}
+        kwargs.update({'body': message})
         cron = self.parse_cron_expression(cron)
         if cron is None:
             return None
@@ -198,7 +198,8 @@ class Cron(object):
          description='Add a cron job.')
     def add(self, message, **kwargs):
         job = self.scheduler.add_job(message.match.group(1),
-                                     message.match.group(2))
+                                     message.match.group(2),
+                                     **kwargs)
 
         return 'Job {0} created.'.format(job)
 
