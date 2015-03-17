@@ -32,7 +32,7 @@ class Scheduler(object):
 
         :param **kwargs: Data to be sent to receivers
         """
-        cls.signal.send(message=kwargs['body'], **kwargs)
+        cls.signal.send(kwargs['message_body'], **kwargs)
 
     def parse_cron_expression(self, cron):
         """Parse cron expression.
@@ -66,7 +66,7 @@ class Scheduler(object):
         :param cron: Cron style expression
         :param message: Message to show
         """
-        kwargs.update({'body': message})
+        kwargs.update({'message_body': message})
         cron = self.parse_cron_expression(cron)
         if cron is None:
             return None
@@ -102,7 +102,7 @@ class Scheduler(object):
                 time = 'paused'
             else:
                 time = job.next_run_time.strftime('%Y/%m/%d %H:%M:%S')
-            message = job.kwargs['message']
+            message = job.kwargs['message_body']
             results.append(fmt.format(job.id, cron, time, message))
 
         return results
