@@ -26,6 +26,8 @@ class Scheduler(object):
         if not self.scheduler.running:
             self.scheduler.start()
 
+        self.alias = None
+
     @classmethod
     def message(cls, **kwargs):
         """Send registered message to robot.
@@ -73,6 +75,7 @@ class Scheduler(object):
         job = None
         try:
             job = self.scheduler.add_job(self.message, 'cron',
+                                         jobstore=self.alias,
                                          kwargs=kwargs, **cron)
         except Exception as e:
             logger.error(e)
@@ -191,6 +194,9 @@ class Cron(object):
             job_options = {}
             if 'options' in options['cron']:
                 job_options = options['cron']['options']
+
+                if 'alias' in job_options:
+                    self.scheduler.alias = job_options['alias']
 
             self.scheduler.add_jobstore(jobstore, **job_options)
 
