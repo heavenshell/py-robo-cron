@@ -20,6 +20,7 @@ logger = logging.getLogger('robo')
 class Scheduler(object):
     #: Robo's signal.
     signal = None
+
     def __init__(self):
         """Construct a scheduler."""
         self.scheduler = BackgroundScheduler()
@@ -153,6 +154,7 @@ class Scheduler(object):
 
 
 class Cron(object):
+
     def __init__(self):
         """Construct a cron handler.
 
