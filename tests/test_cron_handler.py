@@ -29,6 +29,7 @@ class TestScheduler(TestCase):
     @classmethod
     def setUpClass(cls):
         cls.scheduler = Scheduler()
+        cls.scheduler.alias = 'default'
 
     def tearDown(self):
         self.scheduler.scheduler.remove_all_jobs()
@@ -100,6 +101,12 @@ class TestCronHandler(TestCase):
 
         cron = Cron()
         cron.signal = cls.robot.handler_signal
+        cron.options = {
+            'cron': {
+                'jobstore': 'memory',
+                'options': {'alias': 'default'}
+            }
+        }
         method = cls.robot.parse_handler_methods(cron)
         cls.robot.handlers.extend(method)
 
