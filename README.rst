@@ -82,7 +82,9 @@ Add `jobstore` options to Robot options.
       logging.basicConfig(level=args.verbose, format=Robot.debug_log_format)
       logger = logging.getLogger('robo')
 
-      options = {'cron': {'jobstore': 'redis'}}
+      options = {
+          'cron': {'jobstore': 'redis', 'options': {'alias': args.name}}
+      }
       robot = Robot(name=args.name, logger=logger, **options)
       robot.register_default_handlers()
       robot.load_adapter(args.adapter)
