@@ -18,7 +18,7 @@ Dependency
 
 This handler depends on `APScheduler <https://bitbucket.org/agronholm/apscheduler/>`_.
 
-If you want to persistent job, you can use `Redis <https://pypi.python.org/pypi/redis/>_`.
+If you want to persistent job, you can use `Redis <https://pypi.python.org/pypi/redis/>`_.
 
 Usage
 -----
