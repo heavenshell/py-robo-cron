@@ -79,7 +79,7 @@ class Scheduler(object):
                                          jobstore=self.alias,
                                          kwargs=kwargs, **cron)
         except Exception as e:
-            logger.error(e)
+            logger.exception(e)
             logger.info('Cron expression is {0}.'.format(cron))
             logger.info('Action is {0}.'.format(message))
 
